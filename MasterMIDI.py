@@ -194,7 +194,7 @@ for epoch in range(epochs):
 
     #do test outputs
     seed = ''
-    print('-- TESTING...')
+    print('-- TESTING --')
     if args['temp'] is not None:
         temp = args['temp'][0]
         print('-- Test with temperature of',
@@ -206,7 +206,7 @@ for epoch in range(epochs):
 
         print(hell_hex)
         
-        outfile_name = str(epoch + 1) + '_' + str(temp) + '.TXT'
+        outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
         with open(outfile_name, 'wt') as outfile:
             outfile.write(hell_hex)
 
@@ -223,7 +223,7 @@ for epoch in range(epochs):
 
             print(hell_hex)
             
-            outfile_name = str(epoch + 1) + '_' + str(temp) + '.TXT'
+            outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
             with open(outfile_name, 'wt') as outfile:
                 outfile.write(hell_hex)
 
