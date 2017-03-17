@@ -234,10 +234,10 @@ for epoch in range(epochs):
 
             print('Saved to file', outfile_name)
 
-    brain_name = 'n{}_l{}_e{}_{}.BRAIN'.format(nodes,
-                                              layers,
-                                              str(epoch + 1),
-                                              model_name.upper())
+    brain_name = 'n{}_l{}_e{}_{}.BRAIN'.format(model_name.upper(),
+                                               nodes,
+                                               layers,
+                                               str(epoch + 1))
     master_brain.save(working_dir + brain_name)
 
     print('Saved brain to file', brain_name)
