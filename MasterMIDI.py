@@ -148,7 +148,7 @@ else:
 
 #make the 'semi-redundant sequences', or samples, if you like
 X, Y, char_idx = \
-    textfile_to_semi_redundant_sequences(hell_text_name,
+    textfile_to_semi_redundant_sequences(working_dir + hell_text_name,
                                          seq_maxlen=maxlen,
                                          redun_step=3)
 
