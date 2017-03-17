@@ -55,7 +55,7 @@ def hexify(num):
 #build the huge hex dump from hell
 score_hex_string = ''
 for filename in os.listdir(args['directory']):
-    with open(args['directory'] + filename, 'rb') as f:
+    with open(working_dir + args['directory'] + filename, 'rb') as f:
         score = midi2score(f.read())
     
     prev_time = 0
