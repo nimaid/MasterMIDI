@@ -180,8 +180,8 @@ if len(args['model']) > 0:
 '''
 
 #save the dictionary file
-with open(model_name + '_dict.pkl', 'wb') as dictfile:
-    pickle.dump(char_idx, working_dir + dictfile)
+with open(working_dir + model_name + '_dict.pkl', 'wb') as dictfile:
+    pickle.dump(char_idx, dictfile)
 
 '''
 #make a function to convert it back
