@@ -51,7 +51,7 @@ parser.add_argument('-n', '--nodes', help=
 args = vars(parser.parse_args())
 
 #name the model after the lowest directory name
-dir_split = args['directory'].split('/')
+dir_split = args['path'].split('/')
 if dir_split[-1] == '':
     model_name = dir_split[-2]
 else:
@@ -68,8 +68,8 @@ def hexify(num):
 
 #build the huge hex dump from hell
 score_hex_string = ''
-for filename in os.listdir(args['directory']):
-    with open(args['directory'] + filename, 'rb') as f:
+for filename in os.listdir(args['path']):
+    with open(args['path'] + filename, 'rb') as f:
         score = midi2score(f.read())
     
     prev_time = 0
