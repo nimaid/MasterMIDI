@@ -118,8 +118,8 @@ if args['epochs'] is not 50:
 else:
     epochs = args['epochs']
 
-if args['validationset'] is not 0.1: 
-    valid_set = min(0.5, max(0.0, args['validationset'][0])) # default 0.1 is set in .add_argument above if not set by user
+if args['validationset'] is not 0.0: 
+    valid_set = min(0.5, max(0.0, args['validationset'])) # default 0.0 is set in .add_argument above if not set by user
     print("Validation set set to ", valid_set)
 else:
     valid_set = args['validationset']
