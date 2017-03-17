@@ -230,7 +230,7 @@ for epoch in range(epochs):
             print('Saved to file', outfile_name)
 
     brain_name = model_name.upper() + '_' + str(epoch + 1) + '.BRAIN'
-    with open(rain_name, 'wb') as brainfile:
+    with open(brain_name, 'wb') as brainfile:
         pickle.dump(master_brain, brainfile)
 
     print('Saved brain to file', brain_name)
