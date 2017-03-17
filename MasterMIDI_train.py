@@ -246,10 +246,25 @@ for epoch in range(epochs):
                                              seq_seed=seed)
 
             print(hell_hex)
-            
+
+            '''
             outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
             with open(working_dir + outfile_name, 'wt') as outfile:
                 outfile.write(hell_hex)
+            '''
+
+            score = [96]
+            previous_time = 0
+
+            for x in range(len((hell_hex) // 8)):
+                note = list(bytearray.fromhex(hell_hex[x * 4 : (x + 1) * 4]))
+                score.append(['note', previous_time, note[1], 1, note[2], note[3]])
+                previous_time += note[0]
+
+            midi = score2midi(score)
+            outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.MID'
+            with open(working_dir + outfile_name, 'wb') as outfile:
+                outfile.write(midi)
 
             print('Saved to file', outfile_name)
 
