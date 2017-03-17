@@ -256,7 +256,7 @@ for epoch in range(epochs):
             score = [96]
             previous_time = 0
 
-            for x in range(len((hell_hex) // 8)):
+            for x in range(len((hell_hex)) // 8):
                 note = list(bytearray.fromhex(hell_hex[x * 4 : (x + 1) * 4]))
                 score.append(['note', previous_time, note[1], 1, note[2], note[3]])
                 previous_time += note[0]
