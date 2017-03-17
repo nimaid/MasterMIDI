@@ -51,7 +51,7 @@ parser.add_argument('-n', '--nodes', help=
 args = vars(parser.parse_args())
 
 #name the model after the lowest directory name
-dir_split = args['path'].split('/')
+dir_split = args['path'][0].split('/')
 if dir_split[-1] == '':
     model_name = dir_split[-2]
 else:
