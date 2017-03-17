@@ -48,6 +48,18 @@ parser.add_argument('-n', '--nodes', help=
 
 args = vars(parser.parse_args())
 
+#name the model after the lowest directory name
+dir_split = args['directory'].split('/')
+if dir_split[-1] == '':
+    model_name = dir_split[-2]
+else:
+    model_name = dir_split[-1]
+
+#make working directory
+working_dir = args['directory'] + 'mastermidi-data/'
+if not os.path.exists(working_dir):
+    os.makedirs(working_dir)
+
 #turns byte values (0-127) into a hex string of length 2
 def hexify(num):
     return str(hex(num))[2:]
@@ -73,18 +85,6 @@ for filename in os.listdir(args['directory']):
             prev_time = event[1]
     score_hex_string += '00ffcc00' #long pause between songs
 #hex dump from hell completed
-
-#name the model after the lowest directory name
-dir_split = args['directory'].split('/')
-if dir_split[-1] == '':
-    model_name = dir_split[-2]
-else:
-    model_name = dir_split[-1]
-
-#make working directory
-working_dir = args['directory'] + 'mastermidi-data/'
-if not os.path.exists(working_dir):
-    os.makedirs(working_dir)
 
 #now put that hell text in a file
 hell_text_name = 'HEX_' + model_name.upper() + '.TXT'
