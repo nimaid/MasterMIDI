@@ -56,7 +56,7 @@ else:
     model_name = dir_split[-1]
 
 #make working directory
-working_dir = args['directory'] + 'mastermidi-data/'
+working_dir = '/'.join(dir_split[:-2]) + '/' + model_name + '_data/'
 if not os.path.exists(working_dir):
     os.makedirs(working_dir)
 
