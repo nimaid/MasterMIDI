@@ -207,7 +207,7 @@ for epoch in range(epochs):
         print(hell_hex)
         
         outfile_name = str(epoch + 1) + '_' + str(temp) + '.TXT'
-        with open(outfile_name, 'wb') as outfile:
+        with open(outfile_name, 'wt') as outfile:
             outfile.write(hell_hex)
 
         print('Saved to file', outfile_name)
@@ -224,7 +224,7 @@ for epoch in range(epochs):
             print(hell_hex)
             
             outfile_name = str(epoch + 1) + '_' + str(temp) + '.TXT'
-            with open(outfile_name, 'wb') as outfile:
+            with open(outfile_name, 'wt') as outfile:
                 outfile.write(hell_hex)
 
             print('Saved to file', outfile_name)
