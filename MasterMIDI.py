@@ -171,7 +171,7 @@ master_brain = tflearn.SequenceGenerator(brain,
                                          dictionary=char_idx,
                                          seq_maxlen=maxlen,
                                          clip_gradients=5.0,
-                                         checkpoint_path='model_'+ model_name)
+                                         checkpoint_path=working_dir + 'model_'+ model_name)
 
 '''
 #now we see if the user wanted to load a model
