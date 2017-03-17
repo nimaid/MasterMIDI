@@ -13,7 +13,9 @@ import pickle
 parser = argparse.ArgumentParser(description=
     'Pass a text file to generate LSTM output')
 
-parser.add_argument('directory')
+parser.add_argument('-p', '--path', help=
+    'Path to MIDI files.',
+    required=False, nargs=1, type=str)
 parser.add_argument('-t','--temp', help=
     'Defaults to displaying multiple temperature outputs which is suggested.' +
     ' If temp is specified, a value of 0.0 to 2.0 is recommended.' +
@@ -31,8 +33,8 @@ parser.add_argument('-e', '--epochs', help=
     'Number of epochs to train. Default is 50.',
     required=False, default=50, nargs=1, type=int)
 parser.add_argument('-v', '--validationset', help=
-    'Percent of dataset to use as validation. Default is 0.1',
-    required=False, default=0.1, nargs=1, type=float)
+    'Percent of dataset to use as validation. Default is 0.0',
+    required=False, default=0.0, nargs=1, type=float)
 parser.add_argument('-b', '--batchsize', help=
     'Size of batches to train network. Default is 128',
     required=False, default=128, nargs=1, type=int)
