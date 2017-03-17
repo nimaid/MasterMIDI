@@ -81,9 +81,14 @@ if dir_split[-1] == '':
 else:
     model_name = dir_split[-1]
 
+#make working directory
+working_dir = args['directory'] + 'mastermidi-data/'
+if not os.path.exists(working_dir):
+    os.makedirs(working_dir)
+
 #now put that hell text in a file
-hell_text_name = 'HELLHEX_' + model_name.upper() + '.TXT'
-with open(hell_text_name, 'w') as hex_text:
+hell_text_name = 'HEX_' + model_name.upper() + '.TXT'
+with open(working_dir + hell_text_name, 'w') as hex_text:
     hex_text.write(score_hex_string)
 
 #argument handling
@@ -176,7 +181,7 @@ if len(args['model']) > 0:
 
 #save the dictionary file
 with open(model_name + '_dict.pkl', 'wb') as dictfile:
-    pickle.dump(char_idx, dictfile)
+    pickle.dump(char_idx, working_dir + dictfile)
 
 '''
 #make a function to convert it back
@@ -207,7 +212,7 @@ for epoch in range(epochs):
         print(hell_hex)
         
         outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
-        with open(outfile_name, 'wt') as outfile:
+        with open(working_dir + outfile_name, 'wt') as outfile:
             outfile.write(hell_hex)
 
         print('Saved to file', outfile_name)
@@ -224,14 +229,14 @@ for epoch in range(epochs):
             print(hell_hex)
             
             outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
-            with open(outfile_name, 'wt') as outfile:
+            with open(working_dir + outfile_name, 'wt') as outfile:
                 outfile.write(hell_hex)
 
             print('Saved to file', outfile_name)
 
     brain_name = model_name.upper() + '_' + str(epoch + 1) + '.BRAIN'
     with open(brain_name, 'wb') as brainfile:
-        pickle.dump(master_brain, brainfile)
+        pickle.dump(working_dir + master_brain, brainfile)
 
     print('Saved brain to file', brain_name)
 
