@@ -88,188 +88,206 @@ for filename in os.listdir(args['path'][0]):
     score_hex_string += '00ffcc00' #long pause between songs
 #hex dump from hell completed
 
-#now put that hell text in a file
-hell_text_name = 'HEX_' + model_name.upper() + '.TXT'
-with open(working_dir + hell_text_name, 'w') as hex_text:
-    hex_text.write(score_hex_string)
+###now put that hell text in a file
+##hell_text_name = 'HEX_' + model_name.upper() + '.TXT'
+##with open(working_dir + hell_text_name, 'w') as hex_text:
+##    hex_text.write(score_hex_string)
+##
+###argument handling
+##if args['temp'] and args['temp'][0] is not None:
+##    temp = min(2.0, max(0.0, args['temp'][0]))
+##    print("Temperature set to", temp)
+##else:
+##    print("Will display multiple temperature outputs")
+##
+##if args['length'] is not 25:
+##    maxlen = max(1, args['length'][0]) # default 25 is set in .add_argument above if not set by user
+##    print("Sequence max length set to ", maxlen)
+##else:
+##    maxlen = args['length']
+##
+##if args['generate'] is not 600: 
+##    genlen = max(1, args['generate'][0]) # default 600 is set in .add_argument above if not set by user
+##    print("Generate length set to ", genlen)
+##else:
+##    genlen = args['generate']
+##
+##if args['epochs'] is not 50: 
+##    epochs = max(1, args['epochs'][0]) # default 50 is set in .add_argument above if not set by user
+##    print("Epochs set to ", epochs)
+##else:
+##    epochs = args['epochs']
+##
+##if args['validationset'] is not 0.0: 
+##    valid_set = min(0.5, max(0.0, args['validationset'])) # default 0.0 is set in .add_argument above if not set by user
+##    print("Validation set set to ", valid_set)
+##else:
+##    valid_set = args['validationset']
+##
+##if args['batchsize'] is not 128: 
+##    bat_size = max(1, args['batchsize'][0]) # default 128 is set in .add_argument above if not set by user
+##    print("Batch size set to ", bat_size)
+##else:
+##    bat_size = args['batchsize']
+##    
+##if args['dropout'] is not 0.5: 
+##    dropout = max(0, min(1, args['dropout'][0])) # default 0.5 is set in .add_argument above if not set by user
+##    print("Dropout rate set to", dropout)
+##else:
+##    dropout = args['dropout']
+##
+##if args['layers'] is not 3: 
+##    layers = max(1, args['layers'][0]) # default 3 is set in .add_argument above if not set by user
+##    print("Number of layers set to", layers)
+##else:
+##    layers = args['layers']
+##
+##if args['nodes'] is not 128: 
+##    nodes = max(1, args['nodes'][0]) # default 128 is set in .add_argument above if not set by user
+##    print("Number of nodes per layer set to", nodes)
+##else:
+##    nodes = args['nodes']
+##
+###make the 'semi-redundant sequences', or samples, if you like
+##X, Y, char_idx = \
+##    textfile_to_semi_redundant_sequences(working_dir + hell_text_name,
+##                                         seq_maxlen=maxlen,
+##                                         redun_step=3)
+##
+###the time has come to assemble the brain
+##brain = tflearn.input_data([None, maxlen, len(char_idx)])
+##for layer in range(layers):
+##    if layer < layers - 1:
+##        brain = tflearn.lstm(brain, nodes, return_seq=True)
+##    else:
+##        brain = tflearn.lstm(brain, nodes)
+##
+##    brain = tflearn.dropout(brain, dropout)
+##    
+##brain = tflearn.fully_connected(brain, len(char_idx), activation='softmax')
+##brain = tflearn.regression(brain, optimizer='adam',
+##                           loss='categorical_crossentropy',
+##                           learning_rate=0.001)
+##
+##master_brain = tflearn.SequenceGenerator(brain,
+##                                         dictionary=char_idx,
+##                                         seq_maxlen=maxlen,
+##                                         clip_gradients=5.0,
+##                                         checkpoint_path=working_dir + 'model_'+ model_name)
+##
+##'''
+###now we see if the user wanted to load a model
+##if len(args['model']) > 0:
+##        m.load(args['model'][0])
+##'''
+##
+###save the dictionary file
+##with open(working_dir + model_name + '_dict.pkl', 'wb') as dictfile:
+##    pickle.dump(char_idx, dictfile)
+##
+##'''
+###make a function to convert it back
+##def hell_hex_to_midi_bytes(hell_hex):
+##'''
+##
+##for epoch in range(epochs):
+##    #train
+##    master_brain.fit(X,
+##                     Y,
+##                     validation_set=valid_set,
+##                     batch_size=bat_size,
+##                     n_epoch=1,
+##                     run_id=model_name)
+##
+##    #do test outputs
+##    seed = ''
+##    print('-- TESTING --')
+##    if args['temp'] is not None:
+##        temp = args['temp'][0]
+##        print('-- Test with temperature of',
+##              temp,
+##              '--')
+##        hell_hex = master_brain.generate(genlen,
+##                                         temperature=temp,
+##                                         seq_seed=seed)
+##
+##        print(hell_hex)
+##
+##        '''
+##        outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
+##        with open(working_dir + outfile_name, 'wt') as outfile:
+##            outfile.write(hell_hex)
+##        '''
+##
+##        score = [96]
+##        previous_time = 0
+##
+##        for x in range(len((hell_hex) // 8)):
+##            note = list(bytearray.fromhex(hell_hex[x * 4 : (x + 1) * 4]))
+##            score.append(['note', previous_time, note[1], 1, note[2], note[3]])
+##            previous_time += note[0]
+##
+##        midi = score2midi(score)
+##        outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.MID'
+##        with open(working_dir + outfile_name, 'wb') as outfile:
+##            outfile.write(midi)
+##
+##        print('Saved to file', outfile_name)
+##
+##        
+##    else:
+##        for x in range(2 * 4):
+##            #for 8 samples
+##            temp = (x + 1) * 0.25
+##            print('-- Test with temperature of',
+##                  temp, '--')
+##            hell_hex = master_brain.generate(genlen,
+##                                             temperature=temp,
+##                                             seq_seed=seed)
+##
+##            print(hell_hex)
+##
+##            '''
+##            outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
+##            with open(working_dir + outfile_name, 'wt') as outfile:
+##                outfile.write(hell_hex)
+##            '''
+##
+##            score = [96]
+##            previous_time = 0
+##
+##            for x in range(len((hell_hex)) // 8):
+##                note = list(bytearray.fromhex(hell_hex[x * 8 : (x + 1) * 8]))
+##                #index out of range...
+##                score.append(['note', previous_time, note[1:3], 1, note[2:4], note[3:5]])
+##                previous_time += note[0:2]
+##
+##            midi = score2midi(score)
+##            outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.MID'
+##            with open(working_dir + outfile_name, 'wb') as outfile:
+##                outfile.write(midi)
+##
+##            print('Saved to file', outfile_name)
 
-#argument handling
-if args['temp'] and args['temp'][0] is not None:
-    temp = min(2.0, max(0.0, args['temp'][0]))
-    print("Temperature set to", temp)
-else:
-    print("Will display multiple temperature outputs")
+#'''
+score = [96]
+previous_time = 0
 
-if args['length'] is not 25:
-    maxlen = max(1, args['length'][0]) # default 25 is set in .add_argument above if not set by user
-    print("Sequence max length set to ", maxlen)
-else:
-    maxlen = args['length']
+for x in range(len((score_hex_string)) // 8):
+    note = list(bytearray.fromhex(hell_hex[x * 8 : (x + 1) * 8]))
+    #index out of range...
+    score.append(['note', previous_time, note[1:3], 1, note[2:4], note[3:5]])
+    previous_time += note[0:2]
 
-if args['generate'] is not 600: 
-    genlen = max(1, args['generate'][0]) # default 600 is set in .add_argument above if not set by user
-    print("Generate length set to ", genlen)
-else:
-    genlen = args['generate']
+midi = score2midi(score)
+outfile_name = 'ALL.MID'
+with open(working_dir + outfile_name, 'wb') as outfile:
+    outfile.write(midi)
 
-if args['epochs'] is not 50: 
-    epochs = max(1, args['epochs'][0]) # default 50 is set in .add_argument above if not set by user
-    print("Epochs set to ", epochs)
-else:
-    epochs = args['epochs']
 
-if args['validationset'] is not 0.0: 
-    valid_set = min(0.5, max(0.0, args['validationset'])) # default 0.0 is set in .add_argument above if not set by user
-    print("Validation set set to ", valid_set)
-else:
-    valid_set = args['validationset']
-
-if args['batchsize'] is not 128: 
-    bat_size = max(1, args['batchsize'][0]) # default 128 is set in .add_argument above if not set by user
-    print("Batch size set to ", bat_size)
-else:
-    bat_size = args['batchsize']
-    
-if args['dropout'] is not 0.5: 
-    dropout = max(0, min(1, args['dropout'][0])) # default 0.5 is set in .add_argument above if not set by user
-    print("Dropout rate set to", dropout)
-else:
-    dropout = args['dropout']
-
-if args['layers'] is not 3: 
-    layers = max(1, args['layers'][0]) # default 3 is set in .add_argument above if not set by user
-    print("Number of layers set to", layers)
-else:
-    layers = args['layers']
-
-if args['nodes'] is not 128: 
-    nodes = max(1, args['nodes'][0]) # default 128 is set in .add_argument above if not set by user
-    print("Number of nodes per layer set to", nodes)
-else:
-    nodes = args['nodes']
-
-#make the 'semi-redundant sequences', or samples, if you like
-X, Y, char_idx = \
-    textfile_to_semi_redundant_sequences(working_dir + hell_text_name,
-                                         seq_maxlen=maxlen,
-                                         redun_step=3)
-
-#the time has come to assemble the brain
-brain = tflearn.input_data([None, maxlen, len(char_idx)])
-for layer in range(layers):
-    if layer < layers - 1:
-        brain = tflearn.lstm(brain, nodes, return_seq=True)
-    else:
-        brain = tflearn.lstm(brain, nodes)
-
-    brain = tflearn.dropout(brain, dropout)
-    
-brain = tflearn.fully_connected(brain, len(char_idx), activation='softmax')
-brain = tflearn.regression(brain, optimizer='adam',
-                           loss='categorical_crossentropy',
-                           learning_rate=0.001)
-
-master_brain = tflearn.SequenceGenerator(brain,
-                                         dictionary=char_idx,
-                                         seq_maxlen=maxlen,
-                                         clip_gradients=5.0,
-                                         checkpoint_path=working_dir + 'model_'+ model_name)
-
-'''
-#now we see if the user wanted to load a model
-if len(args['model']) > 0:
-        m.load(args['model'][0])
-'''
-
-#save the dictionary file
-with open(working_dir + model_name + '_dict.pkl', 'wb') as dictfile:
-    pickle.dump(char_idx, dictfile)
-
-'''
-#make a function to convert it back
-def hell_hex_to_midi_bytes(hell_hex):
-'''
-
-for epoch in range(epochs):
-    #train
-    master_brain.fit(X,
-                     Y,
-                     validation_set=valid_set,
-                     batch_size=bat_size,
-                     n_epoch=1,
-                     run_id=model_name)
-
-    #do test outputs
-    seed = ''
-    print('-- TESTING --')
-    if args['temp'] is not None:
-        temp = args['temp'][0]
-        print('-- Test with temperature of',
-              temp,
-              '--')
-        hell_hex = master_brain.generate(genlen,
-                                         temperature=temp,
-                                         seq_seed=seed)
-
-        print(hell_hex)
-
-        '''
-        outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
-        with open(working_dir + outfile_name, 'wt') as outfile:
-            outfile.write(hell_hex)
-        '''
-
-        score = [96]
-        previous_time = 0
-
-        for x in range(len((hell_hex) // 8)):
-            note = list(bytearray.fromhex(hell_hex[x * 4 : (x + 1) * 4]))
-            score.append(['note', previous_time, note[1], 1, note[2], note[3]])
-            previous_time += note[0]
-
-        midi = score2midi(score)
-        outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.MID'
-        with open(working_dir + outfile_name, 'wb') as outfile:
-            outfile.write(midi)
-
-        print('Saved to file', outfile_name)
-
-        
-    else:
-        for x in range(2 * 4):
-            #for 8 samples
-            temp = (x + 1) * 0.25
-            print('-- Test with temperature of',
-                  temp, '--')
-            hell_hex = master_brain.generate(genlen,
-                                             temperature=temp,
-                                             seq_seed=seed)
-
-            print(hell_hex)
-
-            '''
-            outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.TXT'
-            with open(working_dir + outfile_name, 'wt') as outfile:
-                outfile.write(hell_hex)
-            '''
-
-            score = [96]
-            previous_time = 0
-
-            for x in range(len((hell_hex)) // 8):
-                note = list(bytearray.fromhex(hell_hex[x * 4 : (x + 1) * 4]))
-                score.append(['note', previous_time, note[1], 1, note[2], note[3]])
-                previous_time += note[0]
-
-            midi = score2midi(score)
-            outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.MID'
-            with open(working_dir + outfile_name, 'wb') as outfile:
-                outfile.write(midi)
-
-            print('Saved to file', outfile_name)
-
+print('Saved to file', outfile_name)
             
-
+'''
     brain_name = 'n{}_l{}_e{}_{}.BRAIN'.format(model_name.upper(),
                                                nodes,
                                                layers,
@@ -277,9 +295,7 @@ for epoch in range(epochs):
     master_brain.save(working_dir + brain_name)
 
     print('Saved brain to file', brain_name)
-
-
-
+'''
 
 
 
