@@ -259,8 +259,8 @@ for filename in os.listdir(args['path'][0]):
 ##            for x in range(len((hell_hex)) // 8):
 ##                note = list(bytearray.fromhex(hell_hex[x * 8 : (x + 1) * 8]))
 ##                #index out of range...
-##                score.append(['note', previous_time, note[1:3], 1, note[2:4], note[3:5]])
-##                previous_time += note[0:2]
+##                score.append(['note', previous_time, note[1], 1, note[2], note[3]])
+##                previous_time += note[0]
 ##
 ##            midi = score2midi(score)
 ##            outfile_name = str(epoch + 1) + '_' + str(temp).replace('.', '-') + '.MID'
@@ -276,8 +276,8 @@ previous_time = 0
 for x in range(len((score_hex_string)) // 8):
     note = list(bytearray.fromhex(score_hex_string[x * 8 : (x + 1) * 8]))
     #index out of range...
-    score.append(['note', previous_time, note[1:3], 1, note[2:4], note[3:5]])
-    previous_time += note[0:2]
+    score.append(['note', previous_time, note[1], 1, note[2], note[3]])
+    previous_time += note[0]
 
 midi = score2midi(score)
 outfile_name = 'ALL.MID'
