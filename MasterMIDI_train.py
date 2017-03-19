@@ -154,8 +154,14 @@ for filename in os.listdir(args['path'][0]):
 
     #now, convert that into text!
     charset = [chr(x) for x in range(ord('z') - 88 + 1, ord('z') + 1)]
+    def midi_to_ascii(midi_note):
+        if midi_note in range(21, 107 + 1):
+            return chr(midi_note + 15)
+        else:
+            return False
+            
     song_ascii = ''
-
+    for 
     
     
     
