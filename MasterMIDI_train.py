@@ -47,8 +47,8 @@ parser.add_argument('-l', '--layers', help =
     'Number of LSTM layers to use. Defaults to 3',
     required = False, default = 3, nargs = 1, type = int)
 parser.add_argument('-n', '--nodes', help =
-    'Number of LSTM nodes per layer. Defaults to 128',
-    required = False, default = 128, nargs = 1, type = int)
+    'Number of LSTM nodes per layer. Defaults to 512',
+    required = False, default = 512, nargs = 1, type = int)
 parser.add_argument('-f', '--frameskip', help =
     'Number of ticks to progress every tick. Defaults to 128',
     required = False, default = 128, nargs = 1, type = int)
@@ -107,8 +107,8 @@ if args['layers'] is not 3:
 else:
     layers = args['layers']
 
-if args['nodes'] is not 128: 
-    nodes = max(1, args['nodes'][0]) # default 128 is set in .add_argument above if not set by user
+if args['nodes'] is not 512: 
+    nodes = max(1, args['nodes'][0]) # default 512 is set in .add_argument above if not set by user
     print("Number of nodes per layer set to", nodes)
 else:
     nodes = args['nodes']
