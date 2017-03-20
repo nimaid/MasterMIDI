@@ -324,7 +324,7 @@ def save_text_as_midi(text, directory, output_name):
     midi.save(full_name)
     print('Saved to "{}"'.format(output_name + '.mid'))
 
-for epoch in range(epochs):
+for epoch in range(0, epochs, report_rate):
     master_brain.fit(X,
                      Y,
                      validation_set = valid_set,
