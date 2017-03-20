@@ -128,16 +128,16 @@ else:
 #name the model after the lowest directory name
 dir_split = args['path'][0].split('/')
 if dir_split[-1] == '':
-    model_name = dir_split[-2]
-else:
-    model_name = dir_split[-1]
+    _ = dir_split.pop()
+
+model_name = dir_split[-1]
 
 #make working directory
-working_dir = '/'.join(dir_split[:-2]) + '/' + model_name + '_data/'
+working_dir = '/'.join(dir_split[:-1]) + '/' + model_name + '_data/'
 if not os.path.exists(working_dir):
     os.makedirs(working_dir)
 
-midi_dir = '/'.join(dir_split[:-1]) + '/'
+midi_dir = '/'.join(dir_split) + '/'
 
 #make a few helper functions
 def midi_to_ascii(midi_note):
