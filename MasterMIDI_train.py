@@ -50,8 +50,8 @@ parser.add_argument('-n', '--nodes', help =
     'Number of LSTM nodes per layer. Defaults to 512',
     required = False, default = 512, nargs = 1, type = int)
 parser.add_argument('-f', '--frameskip', help =
-    'Number of ticks to progress every tick. Defaults to 128',
-    required = False, default = 128, nargs = 1, type = int)
+    'Number of ticks to progress every tick. Defaults to 100',
+    required = False, default = 100, nargs = 1, type = int)
 parser.add_argument('-r', '--reportrate', help =
     'Number of epochs between test output. Default is 25',
     required = False, default = 25, nargs = 1, type = int)
@@ -113,8 +113,8 @@ if args['nodes'] is not 512:
 else:
     nodes = args['nodes']
 
-if args['frameskip'] is not 128: 
-    tick_skip = max(1, args['frameskip'][0]) # default 128 is set in .add_argument above if not set by user
+if args['frameskip'] is not 100: 
+    tick_skip = max(1, args['frameskip'][0]) # default 100 is set in .add_argument above if not set by user
     print("Number of ticks per tick set to", tick_skip)
 else:
     tick_skip = args['frameskip']
