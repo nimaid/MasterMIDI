@@ -291,6 +291,7 @@ def save_text_as_midi(text, directory, output_name):
     midi.tracks.append(midi_track)
     previous_frame = ''
     for text_frame in split_text:
+        text_frame = ''.join(set(text_frame)) #remove repeats
         dtick += tick_skip
         for note_char in text_frame:
             if note_char not in previous_frame:
