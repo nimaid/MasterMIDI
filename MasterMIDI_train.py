@@ -17,41 +17,44 @@ parser = argparse.ArgumentParser(description=
 
 parser.add_argument('-p', '--path', help=
     'Path to MIDI files.',
-    required=False, nargs=1, type=str)
+    required = False, nargs = 1, type=str)
 parser.add_argument('-t','--temp', help=
     'Defaults to displaying multiple temperature outputs which is suggested.' +
     ' If temp is specified, a value of 0.0 to 2.0 is recommended.' +
     ' Temperature is the novelty or' +
     ' riskiness of the generated output.  A value closer to 0 will result' +
     ' in output closer to the input, so higher is riskier.', 
-    required=False, nargs=1, type=float)
+    required = False, nargs = 1, type=float)
 parser.add_argument('-l','--length', help=
     'Optional length of text sequences to analyze.  Defaults to 25.',
-    required=False, default=25, nargs=1, type=int)
+    required = False, default = 25, nargs = 1, type = int)
 parser.add_argument('-g', '--generate', help=
     'Optional length of text to generate at the end of each epoch. Defaults to 600.',
-    required=False, default=600, nargs=1, type=int)
+    required = False, default = 600, nargs = 1, type = int)
 parser.add_argument('-e', '--epochs', help=
     'Number of epochs to train. Default is 50.',
-    required=False, default=50, nargs=1, type=int)
+    required = False, default = 50, nargs = 1, type = int)
 parser.add_argument('-v', '--validationset', help=
     'Percent of dataset to use as validation. Default is 0.0',
-    required=False, default=0.0, nargs=1, type=float)
+    required = False, default = 0.0, nargs = 1, type = float)
 parser.add_argument('-b', '--batchsize', help=
     'Size of batches to train network. Default is 128',
-    required=False, default=128, nargs=1, type=int)
+    required = False, default = 128, nargs = 1, type = int)
 parser.add_argument('-d', '--dropout', help=
     'Dropout rate after each layer. Defaults to 0.5',
-    required=False, default=0.5, nargs=1, type=float)
+    required = False, default = 0.5, nargs = 1, type = float)
 parser.add_argument('-s', '--layers', help=
     'Number of LSTM layers to use. Defaults to 3',
-    required=False, default=3, nargs=1, type=int)
+    required = False, default = 3, nargs = 1, type = int)
 parser.add_argument('-n', '--nodes', help=
     'Number of LSTM nodes per layer. Defaults to 128',
-    required=False, default=128, nargs=1, type=int)
+    required = False, default = 128, nargs = 1, type = int)
 parser.add_argument('-f', '--frameskip', help=
-    'Number of ticks to progress every tick. Defaults to 1',
-    required=False, default=1, nargs=1, type=int)
+    'Number of ticks to progress every tick. Defaults to 128',
+    required = False, default = 128, nargs = 1, type = int)
+parser.add_argument('-r', '--reportrate', help=
+    'Number of epochs between test output. Default is 10',
+    required = False, default = 10, nargs = 1, type = int)
 
 args = vars(parser.parse_args())
 
@@ -110,11 +113,17 @@ if args['nodes'] is not 128:
 else:
     nodes = args['nodes']
 
-if args['frameskip'] is not 1: 
-    tick_skip = max(1, args['frameskip'][0]) # default 1 is set in .add_argument above if not set by user
+if args['frameskip'] is not 128: 
+    tick_skip = max(1, args['frameskip'][0]) # default 128 is set in .add_argument above if not set by user
     print("Number of ticks per tick set to", tick_skip)
 else:
     tick_skip = args['frameskip']
+
+if args['reportrate'] is not 10: 
+    report_rate = max(1, args['reportrate'][0]) # default 10 is set in .add_argument above if not set by user
+    print("Number of epochs between reports set to", report_rate)
+else:
+    report_rate = args['reportrate']
 
 #name the model after the lowest directory name
 dir_split = args['path'][0].split('/')
@@ -320,7 +329,7 @@ for epoch in range(epochs):
                      Y,
                      validation_set = valid_set,
                      batch_size = bat_size,
-                     n_epoch = 1,
+                     n_epoch = report_rate,
                      run_id = model_name)
 
 
