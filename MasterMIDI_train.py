@@ -238,6 +238,7 @@ for filename in os.listdir(args['path'][0]):
         song_ascii += packet_text + ' '
 
     huge_ascii_text += song_ascii
+    huge_ascii_text += ' ' * (frameskip * 64) #just add a second or two of silence between files
 
 #now put that hellish text in a file
 hell_text_name = model_name + '_ascii_dump.txt'
@@ -299,47 +300,57 @@ def save_text_as_midi(text, directory, output_name):
     midi_track = mido.MidiTrack()
     midi.tracks.append(midi_track)
     previous_frame = ''
+    notes_on = set()
     for text_frame in split_text:
         text_frame = ''.join(set(text_frame)) #remove repeats
         dtick += tick_skip
         for note_char in text_frame:
+            note_midi = ascii_to_midi(note_char)
             if note_char not in previous_frame:
                 #if it's a new note turning on
                 midi_track.append(mido.Message('note_on',
-                                               note = ascii_to_midi(note_char),
+                                               note = note_midi,
                                                velocity = 64,
                                                time = dtick))
+                notes_on.add(note_midi)
                 dtick = 0
 
         for prev_note_char in previous_frame:
             if prev_note_char not in text_frame:
                 #if it's an old note turning off
                 midi_track.append(mido.Message('note_off',
-                                               note = ascii_to_midi(note_char),
+                                               note = note_midi,
                                                velocity = 0,
                                                time = dtick))
+                notes_on.discard(note_midi)
                 dtick = 0
         previous_frame = text_frame
 
+    #if there are notes still on, turn them off
+    if len(note_on) > 0:
+        for note_midi in notes_on:
+            midi_track.append(mido.Message('note_off',
+                                               note = note_midi,
+                                               velocity = 0,
+                                               time = dtick))
+        
     midi.save(full_name)
     print('Saved to "{}"'.format(output_name + '.mid'))
 
-for epoch in range(0, epochs, report_rate):
+for report_epoch in range(report_rate, epochs, report_rate):
     master_brain.fit(X,
                      Y,
                      validation_set = valid_set,
                      batch_size = bat_size,
                      n_epoch = report_rate,
                      run_id = model_name)
-
-
     #do test outputs
     print('-- TESTING --')
     if args['temp'] is not None:
         temp = args['temp'][0]
         
         test_text = text_gen(master_brain, genlen, temp)
-        outfile_name = out_name(epoch, temp)
+        outfile_name = out_name(report_epoch, temp)
         save_text_as_midi(test_text, working_dir, outfile_name)
     else:
         for x in range(2 * 4):
@@ -347,11 +358,11 @@ for epoch in range(0, epochs, report_rate):
             temp = (x + 1) * 0.25
             
             test_text = text_gen(master_brain, genlen, temp)
-            outfile_name = out_name(epoch, temp)
+            outfile_name = out_name(report_epoch, temp)
             save_text_as_midi(test_text, working_dir, outfile_name)
 
     #save the current model
-    brain_name = '{}_e{}.brain'.format(model_name, str(epoch + 1))
+    brain_name = '{}_e{}.brain'.format(model_name, str(epoch))
     master_brain.save(working_dir + brain_name)
     print('Saved brain as "{}"'.format(brain_name))
     
