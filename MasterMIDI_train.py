@@ -24,7 +24,7 @@ parser.add_argument('-t','--temp', help =
     ' Temperature is the novelty or' +
     ' riskiness of the generated output.  A value closer to 0 will result' +
     ' in output closer to the input, so higher is riskier.', 
-    required = False, nargs = 1, type=float)
+    required = False, nargs = 1, type = float)
 parser.add_argument('-s','--length', help =
     'Length of text sequences to analyze.  Defaults to 25.',
     required = False, default = 25, nargs = 1, type = int)
@@ -133,10 +133,16 @@ if dir_split[-1] == '':
 model_name = dir_split[-1]
 
 #make working directory
-working_dir = '/'.join(dir_split[:-1]) + '/' + model_name + '_data/'
+working_dir = '/'.join(dir_split[:-1]) + '/MasterMIDI_' + model_name
 if not os.path.exists(working_dir):
     os.makedirs(working_dir)
 
+#make temporary directory
+temp_dir = '/'.join(dir_split[:-2]) + '/temp/'
+if not os.path.exists(working_dir):
+    os.makedirs(working_dir)
+
+#simple
 midi_dir = '/'.join(dir_split) + '/'
 
 #make a few helper functions
@@ -242,7 +248,7 @@ for filename in os.listdir(args['path'][0]):
 
 #now put that hellish text in a file
 hell_text_name = model_name + '_ascii_dump.txt'
-with open(working_dir + hell_text_name, 'w') as text_file:
+with open(temp_dir + hell_text_name, 'w') as text_file:
     text_file.write(huge_ascii_text)
 print('Saved to {}'.format(hell_text_name))
 
@@ -252,7 +258,7 @@ del song_ascii
 
 #make the 'semi-redundant sequences', or samples, if you like
 X, Y, char_dict = \
-    textfile_to_semi_redundant_sequences(working_dir + hell_text_name,
+    textfile_to_semi_redundant_sequences(temp_dir + hell_text_name,
                                          seq_maxlen=maxlen,
                                          redun_step=3)
 
@@ -288,7 +294,7 @@ def text_gen(brain, length, temp, seed=''):
 
 #function for output file names
 def out_name(epoch, temp):
-    return 'E{}_T{}'.format(epoch + 1, temp)
+    return 'E{}_T{}_L{}'.format(epoch + 1, temp, genlen)
 
 #function to save text as MIDI file
 def save_text_as_midi(text, directory, output_name):
@@ -351,7 +357,7 @@ for report_epoch in range(report_rate, epochs, report_rate):
         
         test_text = text_gen(master_brain, genlen, temp)
         outfile_name = out_name(report_epoch, temp)
-        save_text_as_midi(test_text, working_dir, outfile_name)
+        save_text_as_midi(test_text, temp_dir, outfile_name)
     else:
         for x in range(2 * 4):
             #for 8 samples
@@ -363,7 +369,7 @@ for report_epoch in range(report_rate, epochs, report_rate):
 
     #save the current model
     brain_name = '{}_e{}.brain'.format(model_name, str(epoch))
-    master_brain.save(working_dir + brain_name)
+    master_brain.save(temp_dir + brain_name)
     print('Saved brain as "{}"'.format(brain_name))
     
     brain_settings_name = brain_name + '.settings'
@@ -371,7 +377,8 @@ for report_epoch in range(report_rate, epochs, report_rate):
                       'tick_skip' : tick_skip,
                       'nodes' : nodes,
                       'layers' : layers,
-                      'char_dict' : char_dict}
+                      'char_dict' : char_dict
+                      'dropout' : dropout}
     with open(working_dir + brain_settings_name, 'wb') as settings_file:
         pickle.dump(brain_settings, settings_file)
     print('Saved brain settings as "{}"'.format(brain_settings_name))
