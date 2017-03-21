@@ -61,6 +61,12 @@ temp_dir = '/'.join(dir_split[:-2]) + '/temp/'
 if not os.path.exists(working_dir):
     os.makedirs(working_dir)
 
+#UNZIP *_brain.zip INTO temp_dir
+
+#UNPICKLE *.brain.settings IN temp_dir
+
+#SET PICKLE CONTENTS TO GLOBAL VARIABLES
+
 #the time has come to assemble the brain
 brain = tflearn.input_data([None, maxlen, len(char_dict)])
 for layer in range(layers):
@@ -82,6 +88,8 @@ master_brain = tflearn.SequenceGenerator(brain,
                                          clip_gradients=5.0,
                                          checkpoint_path=working_dir + 'model_'+ model_name)
 
+#LOAD *.brain FROM temp_dir INTO master_brain
+
 #function to generate text
 def text_gen(brain, length, temp, seed=''):
     print('Creating a MIDI file with {} characters and  a temperature of {}...'.format(temp))
@@ -93,7 +101,7 @@ def text_gen(brain, length, temp, seed=''):
 
 #function for output file names
 def out_name(epoch, temp):
-    return 'E{}_T{}'.format(epoch + 1, temp)
+    return 'E{}_T{}_L{}'.format(epoch + 1, temp, genlen)
 
 #little helper function for decoding
 def ascii_to_midi(char):
