@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import mido
 
-import os, sys, argparse
+import os, sys, argparse, shutil
 import urllib
 
 import numpy as np
@@ -53,7 +53,7 @@ parser.add_argument('-f', '--frameskip', help =
     'Number of ticks to progress every tick. Defaults to 100',
     required = False, default = 100, nargs = 1, type = int)
 parser.add_argument('-r', '--reportrate', help =
-    'Number of epochs between test output. Default is 25',
+    'Set to do test outputs every n epochs. Default is 25',
     required = False, default = 25, nargs = 1, type = int)
 
 args = vars(parser.parse_args())
@@ -132,18 +132,29 @@ if dir_split[-1] == '':
 
 model_name = dir_split[-1]
 
+#simple make and open
+def make_open(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
 #make working directory
-working_dir = '/'.join(dir_split[:-1]) + '/MasterMIDI_' + model_name
-if not os.path.exists(working_dir):
-    os.makedirs(working_dir)
+working_dir = '/'.join(dir_split[:-1]) + '/MasterMIDI_' + model_name + '/'
+make_open(working_dir)
 
 #make temporary directory
-temp_dir = '/'.join(dir_split[:-2]) + '/temp/'
-if not os.path.exists(working_dir):
-    os.makedirs(working_dir)
+temp_dir = working_dir + 'temp/'
+make_open(temp_dir)
 
-#simple
+#midi directory
 midi_dir = '/'.join(dir_split) + '/'
+
+#make output directory
+out_dir = working_dir + 'Outputs/'
+make_open(out_dir)
+
+#make brain storage
+brain_storage = working_dir + 'Brains/'
+make_open(brain_storage)
 
 #make a few helper functions
 def midi_to_ascii(midi_note):
@@ -163,88 +174,96 @@ for filename in os.listdir(args['path'][0]):
     print('Converting file {} out of {}: "{}"...'.format(current_file,
                                                          len(os.listdir(args['path'][0])),
                                                          filename))
-    midi = mido.MidiFile(midi_dir + filename)
-    merged_midi = mido.merge_tracks(midi.tracks)
+    continue_conversion = True
+    try:
+        midi = mido.MidiFile(midi_dir + filename)
+        merged_midi = mido.merge_tracks(midi.tracks)
+    except:
+        print('^^^^^^^^ABOVE FILE CONTAINED ERRORS. SKIPPING...^^^^^^^^')
+        continue_conversion = False
 
-    #make a list of relevant events, in form [note_state, note, delay_before]
-    midi_list = []
-    gathered_delta = 0
-    for event in merged_midi:
-        if not event.is_meta:
-            is_off = False
-            
-            if event.type == 'note_on':
-                if event.velocity != 0:
-                    midi_list.append([True,
+    print() #just to break the files up on the output
+    
+    if continue_conversion:
+        #make a list of relevant events, in form [note_state, note, delay_before]
+        midi_list = []
+        gathered_delta = 0
+        for event in merged_midi:
+            if not event.is_meta:
+                is_off = False
+                
+                if event.type == 'note_on':
+                    if event.velocity != 0:
+                        midi_list.append([True,
+                                          event.note,
+                                          event.time + gathered_delta])
+                        gathered_delta = 0
+                    else:
+                        is_off = True
+                    
+                elif event.type == 'note_off':
+                    is_off = True
+                    
+                else:
+                    gathered_delta += event.time
+
+                if is_off:
+                    midi_list.append([False,
                                       event.note,
                                       event.time + gathered_delta])
                     gathered_delta = 0
-                else:
-                    is_off = True
-                
-            elif event.type == 'note_off':
-                is_off = True
-                
             else:
                 gathered_delta += event.time
 
-            if is_off:
-                midi_list.append([False,
-                                  event.note,
-                                  event.time + gathered_delta])
-                gathered_delta = 0
-        else:
-            gathered_delta += event.time
+        #calculate total time
+        total_time = 0
+        for event in midi_list:
+            total_time += event[2]
 
-    #calculate total time
-    total_time = 0
-    for event in midi_list:
-        total_time += event[2]
-
-    #now, convert that list into text!
-    song_ascii = ''
-    midi_is_on = {midi_to_ascii(x): False for x in range(21, 108 + 1)}
-    run_time = 0
-    current_event = 0
-    for tick in range(0, total_time, tick_skip):
-        #now, we do the fun part, make a packet!
-        packet_text = ''
-        keep_running = True
-        while(keep_running):
-            event = midi_list[current_event]
-            run_time += event[2]
-            #print('Current step: {}ms \t Current time: {}ms'.format(time_ms, running_total_ms))
-            if run_time > tick:
-                #if our current event is in the next packet
-                run_time -= event[2] #since we didn't use the time yet
-                keep_running = False
-            else:
-                is_on = event[0]
-                note_char = midi_to_ascii(event[1])
-                
-                if note_char != False:
-                    #if it was in range
-                    if is_on:
-                        midi_is_on[note_char] = True
-                    else:
-                        midi_is_on[note_char] = False
+        #now, convert that list into text!
+        song_ascii = ''
+        midi_is_on = {midi_to_ascii(x): False for x in range(21, 108 + 1)}
+        run_time = 0
+        current_event = 0
+        for tick in range(0, total_time, tick_skip):
+            #now, we do the fun part, make a packet!
+            packet_text = ''
+            keep_running = True
+            while(keep_running):
+                event = midi_list[current_event]
+                run_time += event[2]
+                #print('Current step: {}ms \t Current time: {}ms'.format(time_ms, running_total_ms))
+                if run_time > tick:
+                    #if our current event is in the next packet
+                    run_time -= event[2] #since we didn't use the time yet
+                    keep_running = False
                 else:
-                    print('Warning! Skipping out of range note...')
+                    is_on = event[0]
+                    note_char = midi_to_ascii(event[1])
+                    
+                    if note_char != False:
+                        #if it was in range
+                        if is_on:
+                            midi_is_on[note_char] = True
+                        else:
+                            midi_is_on[note_char] = False
+                    else:
+                        print('Warning! Skipping out of range note...')
 
-                current_event += 1
+                    current_event += 1
 
-        #after all events for this step are processed, make text
-        for note in midi_is_on:
-            if midi_is_on[note]:
-                packet_text += note
+            #after all events for this step are processed, make text
+            for note in midi_is_on:
+                if midi_is_on[note]:
+                    packet_text += note
 
-        #sort the letters
-        packet_text = ''.join(sorted(packet_text))
+            #sort the letters
+            packet_text = ''.join(sorted(packet_text))
 
-        song_ascii += packet_text + ' '
+            song_ascii += packet_text + ' '
 
-    huge_ascii_text += song_ascii
-    huge_ascii_text += ' ' * (frameskip * 64) #just add a second or two of silence between files
+        huge_ascii_text += song_ascii
+        huge_ascii_text += ' ' * (tick_skip * 64) #just add a second or two of silence between files
 
 #now put that hellish text in a file
 hell_text_name = model_name + '_ascii_dump.txt'
@@ -261,6 +280,9 @@ X, Y, char_dict = \
     textfile_to_semi_redundant_sequences(temp_dir + hell_text_name,
                                          seq_maxlen=maxlen,
                                          redun_step=3)
+
+#remove the text file
+os.remove(temp_dir + hell_text_name)
 
 #the time has come to assemble the brain
 brain = tflearn.input_data([None, maxlen, len(char_dict)])
@@ -281,7 +303,7 @@ master_brain = tflearn.SequenceGenerator(brain,
                                          dictionary=char_dict,
                                          seq_maxlen=maxlen,
                                          clip_gradients=5.0,
-                                         checkpoint_path=working_dir + 'model_'+ model_name)
+                                         checkpoint_path=temp_dir + model_name + '.checkpoint')
 
 #function to generate text
 def text_gen(brain, length, temp, seed=''):
@@ -333,7 +355,7 @@ def save_text_as_midi(text, directory, output_name):
         previous_frame = text_frame
 
     #if there are notes still on, turn them off
-    if len(note_on) > 0:
+    if len(notes_on) > 0:
         for note_midi in notes_on:
             midi_track.append(mido.Message('note_off',
                                                note = note_midi,
@@ -342,47 +364,75 @@ def save_text_as_midi(text, directory, output_name):
         
     midi.save(full_name)
     print('Saved to "{}"'.format(output_name + '.mid'))
+    print()
 
-for report_epoch in range(report_rate, epochs, report_rate):
+for epoch in range(1, epochs + 1):
+    #do one epoch
     master_brain.fit(X,
                      Y,
                      validation_set = valid_set,
                      batch_size = bat_size,
-                     n_epoch = report_rate,
+                     n_epoch = 1,
                      run_id = model_name)
-    #do test outputs
-    print('-- TESTING --')
-    if args['temp'] is not None:
-        temp = args['temp'][0]
-        
-        test_text = text_gen(master_brain, genlen, temp)
-        outfile_name = out_name(report_epoch, temp)
-        save_text_as_midi(test_text, temp_dir, outfile_name)
-    else:
-        for x in range(2 * 4):
-            #for 8 samples
-            temp = (x + 1) * 0.25
-            
-            test_text = text_gen(master_brain, genlen, temp)
-            outfile_name = out_name(report_epoch, temp)
-            save_text_as_midi(test_text, working_dir, outfile_name)
 
-    #save the current model
-    brain_name = '{}_e{}.brain'.format(model_name, str(epoch))
-    master_brain.save(temp_dir + brain_name)
-    print('Saved brain as "{}"'.format(brain_name))
-    
-    brain_settings_name = brain_name + '.settings'
+    #make super-temporary directory
+    sub_dir = temp_dir + '/' + model_name + '/'
+    make_open(sub_dir)
+
+    #save the current model weights
+    brain_name = '{}_e{}'.format(model_name, epoch)
+    master_brain.save(sub_dir + brain_name + '.weights')
+
+    #save the current model metadata and settings
     brain_settings = {'model_name' : model_name,
                       'tick_skip' : tick_skip,
                       'nodes' : nodes,
                       'layers' : layers,
-                      'char_dict' : char_dict
+                      'char_dict' : char_dict,
                       'dropout' : dropout}
-    with open(working_dir + brain_settings_name, 'wb') as settings_file:
+    with open(sub_dir + brain_name + '.settings', 'wb') as settings_file:
         pickle.dump(brain_settings, settings_file)
-    print('Saved brain settings as "{}"'.format(brain_settings_name))
 
+    #now wrap it all up
+    shutil.make_archive(brain_storage + brain_name + '.brain', 'zip', sub_dir)
+
+    #and rename that sucker
+    shutil.move(brain_storage + brain_name + '.brain.zip', brain_storage + brain_name + '.brain')
+
+    print('Saved brain to', brain_storage + brain_name + '.brain')
+    print()
+    
+    #clean up the mess
+    shutil.rmtree(sub_dir)
+
+    try:
+        os.remove(working_dir + 'checkpoint')
+    except:
+        pass
+
+    if(epoch % report_rate == 0):
+        epoch_dir = out_dir + 'Epoch_{}/'.format(epoch)
+        make_open(epoch_dir)
+        
+        #do test outputs
+        print('-- TESTING --')
+        if args['temp'] is not None:
+            temp = args['temp'][0]
+            
+            test_text = text_gen(master_brain, genlen, temp)
+            outfile_name = out_name(epoch, temp)
+            save_text_as_midi(test_text, epoch_dir, outfile_name)
+        else:
+            for x in range(2 * 4):
+                #for 8 samples
+                temp = (x + 1) * 0.25
+                
+                test_text = text_gen(master_brain, genlen, temp)
+                outfile_name = out_name(epoch, temp)
+                save_text_as_midi(test_text, epoch_dir, outfile_name)
+    
+#ultimate cleanup!
+shutil.rmtree(temp_dir)
 
 
 

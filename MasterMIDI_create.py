@@ -58,8 +58,8 @@ if not os.path.exists(working_dir):
 
 #make temporary directory
 temp_dir = '/'.join(dir_split[:-2]) + '/temp/'
-if not os.path.exists(working_dir):
-    os.makedirs(working_dir)
+if not os.path.exists(temp_dir):
+    os.makedirs(temp_dir)
 
 #UNZIP *_brain.zip INTO temp_dir
 
