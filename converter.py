@@ -19,20 +19,32 @@ def text_to_midi(text):
     previous_frame = ''
     notes_on = set()
     for text_frame in split_text:
+        frame_split = text_frame.split('!')
+
+        time = 0
         try:
-            frame_split = text_frame.split('!')
-
             time = int(frame_split[0])
-            note = ascii_to_midi(frame_split[1])
-            velocity = int(frame_split[2])
-            state = 'note_off'
-            if velocity != '0':
-                state = 'note_on'
-
-            midi_track.append(mido.Message(state,
-                                           note = note,
-                                           velocity = velocity,
-                                           time = time))
         except:
-            print('The following packet contained errors: {}'.format(text_frame))
+            pass
+
+        note = '$' #lowest note
+        try:
+            note = ascii_to_midi(frame_split[1])
+        except:
+            pass
+
+        velocity = 0
+        try:
+            velocity = int(frame_split[2])
+        except:
+            pass
+
+        state = 'note_off'
+        if velocity != '0':
+            state = 'note_on'
+
+        midi_track.append(mido.Message(state,
+                                       note = note,
+                                       velocity = velocity,
+                                       time = time))
     return midi
