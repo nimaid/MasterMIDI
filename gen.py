@@ -27,11 +27,16 @@ textgen = textgenrnn(weights_path = args['brain'][0] + "/weights.hdf5",
                      vocab_path = args['brain'][0] + "/vocab.json",
                      config_path = args['brain'][0] + "/config.json")
 
+print('Creating {} characters...'.format(args['length'][0]))
 text = textgen.generate(max_gen_length = args['length'][0],
                         return_as_list = True,
                         temperature = args['temp'])[0]
+print('Done making text!')
 
+print('Converting text to MIDI...')
 midi = converter.text_to_midi(text)
+print('Done converting to MIDI!')
 
+print('Saving MIDI to "{}"'.format(args['file'][0]))
 midi.save(args['file'][0])
-print('Saved to "{}"'.format(args['file'][0]))
+print('Saved to "{}"!'.format(args['file'][0]))
