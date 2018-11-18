@@ -50,7 +50,7 @@ for filename in os.listdir(args['path'][0]):
     print() #just to break the files up on the output
 
     if continue_conversion:
-        #make a list of relevant events, in form [note_state, note, delay_before]
+        #make a list of relevant events, in form [velocity, note, delay_before]
         midi_list = []
         gathered_delta = 0
         for event in merged_midi:
@@ -59,7 +59,7 @@ for filename in os.listdir(args['path'][0]):
 
                 if event.type == 'note_on':
                     if event.velocity != 0:
-                        midi_list.append([True,
+                        midi_list.append([event.velocity,
                                           event.note,
                                           event.time + gathered_delta])
                         gathered_delta = 0
@@ -73,17 +73,12 @@ for filename in os.listdir(args['path'][0]):
                     gathered_delta += event.time
 
                 if is_off:
-                    midi_list.append([False,
+                    midi_list.append([0,
                                       event.note,
                                       event.time + gathered_delta])
                     gathered_delta = 0
             else:
                 gathered_delta += event.time
-
-        #calculate total time
-        total_time = 0
-        for event in midi_list:
-            total_time += event[2]
 
         #now, convert that list into text!
         song_ascii = ''
@@ -92,10 +87,7 @@ for filename in os.listdir(args['path'][0]):
             packet_ascii += '!'
             packet_ascii += midi_to_ascii(note[1]) #note
             packet_ascii += '!'
-            if note[0]: #state
-                packet_ascii += '1'
-            else:
-                packet_ascii += '0'
+            packet_ascii += str(note[0]) #velocity
 
             song_ascii += packet_ascii
             song_ascii += ' '
