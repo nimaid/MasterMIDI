@@ -1,8 +1,6 @@
 #! /usr/bin/python3
 import mido, argparse
 
-tick_skip = 1
-
 parser = argparse.ArgumentParser(description=
     'Convert text file into a MIDI file.\nUsage: python3 text_to_midi.py -t text_file -f midi_filename')
 parser.add_argument('-t', '--text', help =
@@ -30,44 +28,26 @@ def ascii_to_midi(char):
 
 #convert
 split_text = text.split(' ')
-dtick = 0
 midi = mido.MidiFile()
 midi_track = mido.MidiTrack()
 midi.tracks.append(midi_track)
 previous_frame = ''
 notes_on = set()
 for text_frame in split_text:
-    text_frame = ''.join(set(text_frame)) #remove repeats
-    dtick += tick_skip
-    for note_char in text_frame:
-        note_midi = ascii_to_midi(note_char)
-        if note_char not in previous_frame:
-            #if it's a new note turning on
-            midi_track.append(mido.Message('note_on',
-                                           note = note_midi,
-                                           velocity = 64,
-                                           time = dtick))
-            notes_on.add(note_midi)
-            dtick = 0
+    frame_split = text_frame.split('!')
 
-    for prev_note_char in previous_frame:
-        if prev_note_char not in text_frame:
-            #if it's an old note turning off
-            midi_track.append(mido.Message('note_off',
-                                           note = note_midi,
-                                           velocity = 0,
-                                           time = dtick))
-            notes_on.discard(note_midi)
-            dtick = 0
-    previous_frame = text_frame
+    time = int(frame_split[0])
+    note = ascii_to_midi(frame_split[1])
+    state = 'note_off'
+    if frame_split[2] == '1':
+        state = 'note_on'
 
-#if there are notes still on, turn them off
-if len(notes_on) > 0:
-    for note_midi in notes_on:
-        midi_track.append(mido.Message('note_off',
-                                           note = note_midi,
-                                           velocity = 0,
-                                           time = dtick))
+    print("Note={}, State={}, Time={}".format(note, state, time))
+    midi_track.append(mido.Message(state,
+                                   note = note,
+                                   velocity = 64,
+                                   time = time))
+
 
 midi.save(args['file'][0])
 print('Saved to "{}"'.format(args['file'][0]))

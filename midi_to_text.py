@@ -1,8 +1,6 @@
 #! /usr/bin/python3
 import mido, argparse, os
 
-tick_skip = 1
-
 parser = argparse.ArgumentParser(description=
     'Convert all MIDI files in a directory to a text dump.\nUsage: python3 midi_to_text.py -p path_to_midi_files -f text_filename')
 parser.add_argument('-p', '--path', help =
@@ -89,53 +87,28 @@ for filename in os.listdir(args['path'][0]):
 
         #now, convert that list into text!
         song_ascii = ''
-        midi_is_on = {midi_to_ascii(x): False for x in range(21, 108 + 1)}
-        run_time = 0
-        current_event = 0
-        for tick in range(0, total_time, tick_skip):
-            #now, we do the fun part, make a packet!
-            packet_text = ''
-            keep_running = True
-            while(keep_running):
-                event = midi_list[current_event]
-                run_time += event[2]
-                #print('Current step: {}ms \t Current time: {}ms'.format(time_ms, running_total_ms))
-                if run_time > tick:
-                    #if our current event is in the next packet
-                    run_time -= event[2] #since we didn't use the time yet
-                    keep_running = False
-                else:
-                    is_on = event[0]
-                    note_char = midi_to_ascii(event[1])
+        for note in midi_list:
+            packet_ascii = str(note[2]) #time before
+            packet_ascii += '!'
+            packet_ascii += midi_to_ascii(note[1]) #note
+            packet_ascii += '!'
+            if note[0]: #state
+                packet_ascii += '1'
+            else:
+                packet_ascii += '0'
 
-                    if note_char != False:
-                        #if it was in range
-                        if is_on:
-                            midi_is_on[note_char] = True
-                        else:
-                            midi_is_on[note_char] = False
-                    else:
-                        print('Warning! Skipping out of range note...')
+            song_ascii += packet_ascii
+            song_ascii += ' '
 
-                    current_event += 1
 
-            #after all events for this step are processed, make text
-            for note in midi_is_on:
-                if midi_is_on[note]:
-                    packet_text += note
-
-            #sort the letters
-            packet_text = ''.join(sorted(packet_text))
-
-            song_ascii += packet_text + ' '
 
         huge_ascii_text += song_ascii
-        huge_ascii_text += ' ' * (tick_skip * 64) #just add a second or two of silence between files
+        huge_ascii_text += '2000!a!0 ' #just add two seconds of silence between files
 
 
 #now put that hellish text in a file
 with open(args['file'][0], 'w') as text_file:
-    text_file.write(huge_ascii_text)
+    text_file.write(huge_ascii_text.strip())
 print('Saved to {}'.format(args['file'][0]))
 
 #get that monster out of RAM!
