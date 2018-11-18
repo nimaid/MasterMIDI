@@ -34,5 +34,5 @@ def text_to_midi(text):
                                            velocity = velocity,
                                            time = time))
         except:
-            print('The following packet contained erroes: {}'.format(text_frame))
+            print('The following packet contained errors: {}'.format(text_frame))
     return midi

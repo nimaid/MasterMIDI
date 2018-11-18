@@ -94,7 +94,6 @@ for filename in os.listdir(args['path'][0]):
                 print('ERROR WHILE CONVERTING NOTE {}, SKIPPING...'.format(note))
 
         huge_ascii_text += song_ascii
-        huge_ascii_text += '2000!a!0 ' #just add two seconds of silence between files
 
         print() #just to break the files up on the output
 

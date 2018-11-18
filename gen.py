@@ -17,7 +17,7 @@ parser.add_argument('-f', '--file', help =
     required = True, nargs = 1, type = str)
 parser.add_argument('-t', '--temp', help =
     'Temperature of output. (Default = 1.0)',
-    required = False, defalut = 1.0, nargs = 1, type = float)
+    required = False, default = 1.0, nargs = 1, type = float)
 args = vars(parser.parse_args())
 
 #generate text
@@ -29,7 +29,7 @@ textgen = textgenrnn(weights_path = args['brain'][0] + "/weights.hdf5",
 
 text = textgen.generate(max_gen_length = args['length'][0],
                         return_as_list = True,
-                        temperature = arge['temp'][0])[0]
+                        temperature = args['temp'])[0]
 
 midi = converter.text_to_midi(text)
 
