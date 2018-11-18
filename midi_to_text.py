@@ -47,8 +47,6 @@ for filename in os.listdir(args['path'][0]):
         print('^^^^^^^^ABOVE FILE CONTAINED ERRORS. SKIPPING...^^^^^^^^')
         continue_conversion = False
 
-    print() #just to break the files up on the output
-
     if continue_conversion:
         #make a list of relevant events, in form [velocity, note, delay_before]
         midi_list = []
@@ -83,20 +81,22 @@ for filename in os.listdir(args['path'][0]):
         #now, convert that list into text!
         song_ascii = ''
         for note in midi_list:
-            packet_ascii = str(note[2]) #time before
-            packet_ascii += '!'
-            packet_ascii += midi_to_ascii(note[1]) #note
-            packet_ascii += '!'
-            packet_ascii += str(note[0]) #velocity
+            try:
+                packet_ascii = str(note[2]) #time before
+                packet_ascii += '!'
+                packet_ascii += midi_to_ascii(note[1]) #note
+                packet_ascii += '!'
+                packet_ascii += str(note[0]) #velocity
 
-            song_ascii += packet_ascii
-            song_ascii += ' '
-
-
+                song_ascii += packet_ascii
+                song_ascii += ' '
+            except:
+                print('ERROR WHILE CONVERTING NOTE {}, SKIPPING...'.format(note))
 
         huge_ascii_text += song_ascii
         huge_ascii_text += '2000!a!0 ' #just add two seconds of silence between files
 
+        print() #just to break the files up on the output
 
 #now put that hellish text in a file
 with open(args['file'][0], 'w') as text_file:
