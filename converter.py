@@ -21,30 +21,33 @@ def text_to_midi(text):
     for text_frame in split_text:
         frame_split = text_frame.split('!')
 
-        time = 0
+        time = None
         try:
             time = int(frame_split[0])
         except:
-            pass
+            time = 0
 
-        note = '$' #lowest note
+        note = None
         try:
             note = ascii_to_midi(frame_split[1])
         except:
-            pass
+            note = '$' #lowest note
 
-        velocity = 0
+        velocity = None
         try:
             velocity = int(frame_split[2])
         except:
-            pass
+            velocity = 0
 
         state = 'note_off'
         if velocity != '0':
             state = 'note_on'
 
-        midi_track.append(mido.Message(state,
-                                       note = note,
-                                       velocity = velocity,
-                                       time = time))
+        try:
+            midi_track.append(mido.Message(state,
+                                           note = note,
+                                           velocity = velocity,
+                                           time = time))
+        except:
+            print('ERROR WHILE CONVERTING NOTE {}, SKIPPING...'.format(text_frame))
     return midi
