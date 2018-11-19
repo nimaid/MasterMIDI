@@ -56,6 +56,8 @@ def text_to_midi(text):
     midi = mido.MidiFile()
     midi_track = mido.MidiTrack()
     midi.tracks.append(midi_track)
+    midi_track.append(mido.MetaMessage('set_tempo', tempo=mido.bpm2tempo(60)))
+
     previous_frame = ''
     notes_on = set()
     for text_frame in split_text:
