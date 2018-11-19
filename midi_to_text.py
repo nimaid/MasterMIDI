@@ -23,7 +23,7 @@ midi_dir = '/'.join(dir_split) + '/'
 
 #make a few helper functions
 def midi_to_ascii(midi_note):
-        if midi_note in range(21, 108 + 1):
+        if midi_note in range(19, 111 + 1):
             return chr(midi_note + 15)
         else:
             return False
@@ -31,8 +31,48 @@ def midi_to_ascii(midi_note):
 def ascii_to_midi(char):
     return ord(char) - 15
 
+def encode(number):
+    alphabet = '"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+
+    if not isinstance(number, int):
+        raise TypeError('number must be an integer')
+
+    base93 = ''
+    sign = ''
+
+    if number < 0:
+        sign = '-'
+        number = -number
+
+    if 0 <= number < len(alphabet):
+        return sign + alphabet[number]
+
+    while number != 0:
+        number, i = divmod(number, len(alphabet))
+        base93 = alphabet[i] + base93
+
+    return sign + base93
+
+def decode(number):
+    alphabet = '"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+
+    if not isinstance(number, str):
+        raise TypeError('number must be a string')
+
+    base10 = 0
+
+    try:
+        for i in range(len(number)):
+            val = alphabet.find(number[i])
+            val *= pow(len(alphabet), len(number) - i - 1)
+            base10 += val
+    except:
+        raise TypeError('number contains invalid characters')
+
+    return base10
+
 #build the huge ASCII dump from hell
-huge_ascii_text = ''
+text_file = open(args['file'][0], 'w')
 current_file = 0
 for filename in os.listdir(args['path'][0]):
     current_file += 1
@@ -82,26 +122,20 @@ for filename in os.listdir(args['path'][0]):
         song_ascii = ''
         for note in midi_list:
             try:
-                packet_ascii = str(note[2]) #time before
+                packet_ascii = encode(note[2]) #time before
                 packet_ascii += '!'
                 packet_ascii += midi_to_ascii(note[1]) #note
                 packet_ascii += '!'
-                packet_ascii += str(note[0]) #velocity
+                packet_ascii += encode(note[0]) #velocity
 
                 song_ascii += packet_ascii
                 song_ascii += ' '
             except:
                 print('ERROR WHILE CONVERTING NOTE {}, SKIPPING...'.format(note))
 
-        huge_ascii_text += song_ascii
+        text_file.write(song_ascii)
+        text_file.flush()
+        os.fsync(text_file.fileno())
+    print() #just to break the files up on the output
 
-        print() #just to break the files up on the output
-
-#now put that hellish text in a file
-with open(args['file'][0], 'w') as text_file:
-    text_file.write(huge_ascii_text.strip())
-print('Saved to {}'.format(args['file'][0]))
-
-#get that monster out of RAM!
-del huge_ascii_text
-del song_ascii
+text_file.close()
