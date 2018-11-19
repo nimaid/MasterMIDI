@@ -35,7 +35,7 @@ text = textgen.generate(max_gen_length = args['length'][0],
 
 gen_secs = time.time() - start_time
 gen_time =  str(datetime.timedelta(seconds=gen_secs)).split(':')
-time_text = str(round(gen_time[-1])) + " seconds"
+time_text = str(round(float(gen_time[-1]))) + " seconds"
 if len(time_text) >= 2:
     mins = gen_time[-2]
     if mins[0] == '0':
