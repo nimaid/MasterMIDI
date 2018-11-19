@@ -1,5 +1,5 @@
 #! /usr/bin/python3
-import argparse
+import argparse, time, datetime
 import converter
 
 tick_skip = 1
@@ -21,6 +21,7 @@ parser.add_argument('-t', '--temp', help =
 args = vars(parser.parse_args())
 
 #generate text
+start_time = time.time()
 from textgenrnn import textgenrnn
 
 textgen = textgenrnn(weights_path = args['brain'][0] + "/weights.hdf5",
@@ -31,7 +32,23 @@ print('Creating {} characters...'.format(args['length'][0]))
 text = textgen.generate(max_gen_length = args['length'][0],
                         return_as_list = True,
                         temperature = args['temp'])[0]
-print('Done making text!')
+
+gen_secs = time.time() - start_time
+gen_time =  str(datetime.timedelta(seconds=gen_secs)).split(':')
+time_text = str(gen_time[-1]) + " seconds"
+if len(time_text) >= 2:
+    mins = gen_time[-2]
+    if mins[0] == '0':
+        mins = mins[1:]
+    if mins not in ('', '0'):
+        time_text = mins + " minutes, " + time_text
+if len(time_text) >= 3:
+    hours = gen_time[-3]
+    if hours[0] == '0':
+        hours = hours[1:]
+    if hours not in ('', '0'):
+        time_text = hours + " hours, " + time_text
+print('Done making text! It took {}.'.format(time_text))
 
 print('Converting text to MIDI...')
 midi = converter.text_to_midi(text)

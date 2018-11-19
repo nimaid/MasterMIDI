@@ -91,6 +91,6 @@ def text_to_midi(text):
                                            note = note,
                                            velocity = velocity,
                                            time = time))
-        except not KeyboardInterrupt:
+        except:
             print('ERROR WHILE CONVERTING NOTE {}, SKIPPING...'.format(text_frame))
     return midi
