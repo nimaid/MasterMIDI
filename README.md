@@ -1,5 +1,8 @@
-# MasterMIDI
-A super smart neural network that makes you music.
+<h1 align="center">MasterMIDI</h1>
+<h2 align="center">A super smart neural network that makes you music.</h2>
 
-[Bandcamp Album](https://bit.ly/neuralpiano)
-![Album Art](https://github.com/nimaid/MasterMIDI/raw/master/album.png)
+<a href="https://bit.ly/neuralpianotutorial"><h1 align="center">Interactive Tutorial</h1></a>
+
+<a href="https://bit.ly/neuralpiano"><h3 align="center">Bandcamp Album</h3></a>
+<a href="https://bit.ly/neuralpiano"><p align="center"><img src="https://github.com/nimaid/MasterMIDI/raw/master/album.png" width=500px /></p></a>
+
