@@ -1,5 +1,5 @@
 #! /usr/bin/python3
-import argparse, time, datetime
+import argparse, os, time, datetime, zipfile, tempfile, shutil
 import converter
 
 tick_skip = 1
@@ -7,7 +7,7 @@ tick_skip = 1
 parser = argparse.ArgumentParser(description=
     'Use a brain to generate a MIDI file.\nUsage: python3 gen.py -b brain_path -l length -f midi_filename')
 parser.add_argument('-b', '--brain', help =
-    'Path to brain files.',
+    'Path to brain zip archive.',
     required = True, nargs = 1, type = str)
 parser.add_argument('-l', '--length', help =
     'Length of MIDI to generate.',
@@ -20,13 +20,25 @@ parser.add_argument('-t', '--temp', help =
     required = False, default = 1.0, nargs = 1, type = float)
 args = vars(parser.parse_args())
 
+midi_filename = args['file'][0]
+if midi_filename[-4:].lower() != '.mid':
+    midi_filename += '.mid'
+
+#extract brain
+tempdir = tempfile.gettempdir()
+tempdir = os.path.join(tempdir, 'MasterMIDI')
+if not os.path.exists(tempdir):
+    os.mkdir(tempdir)
+with zipfile.ZipFile(args['brain'][0], 'r') as zf:
+    zf.extractall(tempdir)
+
 #generate text
 start_time = time.time()
 from textgenrnn import textgenrnn
 
-textgen = textgenrnn(weights_path = args['brain'][0] + "/weights.hdf5",
-                     vocab_path = args['brain'][0] + "/vocab.json",
-                     config_path = args['brain'][0] + "/config.json")
+textgen = textgenrnn(weights_path = os.path.join(tempdir, 'weights.hdf5'),
+                     vocab_path = os.path.join(tempdir, 'vocab.json'),
+                     config_path = os.path.join(tempdir, 'config.json'))
 
 print('Creating {} characters...'.format(args['length'][0]))
 text = textgen.generate(max_gen_length = args['length'][0],
@@ -54,6 +66,7 @@ print('Converting text to MIDI...')
 midi = converter.text_to_midi(text)
 print('Done converting to MIDI!')
 
-print('Saving MIDI to "{}"'.format(args['file'][0]))
-midi.save(args['file'][0])
-print('Saved to "{}"!'.format(args['file'][0]))
+print('Saving MIDI to "{}"'.format(midi_filename))
+midi.save(midi_filename)
+print('Saved to "{}"!'.format(midi_filename))
+shutil.rmtree(tempdir)
