@@ -25,7 +25,7 @@ args = vars(parser.parse_args())
 
 midi_base_filename = args['file'][0]
 if midi_base_filename[-4:].lower() == '.mid':
-    midi_base_filename = midi_base_filename[-4:]
+    midi_base_filename = midi_base_filename[:-4]
 
 #extract brain
 tempdir = tempfile.gettempdir()
